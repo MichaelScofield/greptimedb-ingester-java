@@ -1,0 +1,50 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "io.greptime.export";
+
+service DataExport {
+  rpc DataExport(DataExportRequest) returns (DataExportResponse);
+}
+
+message DataExportRequest {
+  string catalog = 1;
+  string schema = 2;
+  repeated string tables = 3;
+  /// The file path to export data.
+  string file_path = 4;
+  /// The name of the zip file to export.
+  string file_name = 5;
+  /// The min timestamp of the data to export.
+  optional int64 min_timestamp_ms = 6;
+  /// The max timestamp of the data to export.
+  optional int64 max_timestamp_ms = 7;
+  /// The compression type of the exported zip file.
+  CompressionType compression_type = 8;
+  /// The compression level of the exported zip file.
+  int32 compression_level = 9;
+  /// Compressing a certain amount of data. Because the main CPU cost of data
+  /// export comes from compression.
+  /// How long to sleep after each compression of data.
+  uint64 compression_interval_ms = 10;
+  /// The number of bytes to compress at a time.
+  uint64 bytes_per_compression = 11;
+  /// The ID of the continuous incremental data export task. If empty, it is a
+  /// normal data export task. If not empty, it is a continuous incremental
+  /// data export task.
+  optional string task_id = 12;
+  /// The tables are prohibited from exporting.
+  repeated string black_list = 13;
+}
+
+enum CompressionType {
+  Zstd = 0;
+  Deflate = 1;
+  Bz = 2;
+  Lzma = 3;
+  Xz = 4;
+}
+
+message DataExportResponse {
+  uint32 sst_count = 1;
+}
